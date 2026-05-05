@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from temporalio.client import Client
 
+from app.schemas.audio import UploadResponse
 from app.api.deps import get_current_user, get_db_session
 from app.services.s3_service import upload_file
 from app.db.crud import create_audio
@@ -12,7 +13,9 @@ router = APIRouter()
 settings = get_settings()
 
 
-@router.post("/upload")
+
+
+@router.post("/upload", response_model=UploadResponse)
 async def upload_audio(
     file: UploadFile = File(...),
     user=Depends(get_current_user),
@@ -42,7 +45,7 @@ async def upload_audio(
         task_queue=settings.TASK_QUEUE,
     )
 
-    return {
-        "audio_id": str(audio_id),
-        "status": "processing"
-    }
+    return UploadResponse(
+        audio_id=audio_id,
+        status="processing"
+    )
