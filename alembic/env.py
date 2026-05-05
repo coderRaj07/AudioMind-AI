@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
 from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
@@ -5,12 +9,12 @@ from alembic import context
 
 from app.core.config import get_settings
 from app.db.base import Base
-from app.db import models  # IMPORTANT: import models
+from app.db import models  # loads all models
 
 settings = get_settings()
 
 config = context.config
-fileConfig(config.config_file_name)
+# fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
 

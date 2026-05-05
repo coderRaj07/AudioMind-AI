@@ -5,7 +5,7 @@ from temporalio.client import Client
 from app.schemas.audio import UploadResponse
 from app.api.deps import get_current_user, get_db_session
 from app.services.s3_service import upload_file
-from app.db.crud import create_audio
+from app.db.repositories.audio_repo import AudioRepository
 from app.core.config import get_settings
 from app.utils.ids import generate_uuid
 
@@ -29,7 +29,9 @@ async def upload_audio(
     file_url = upload_file(file_bytes, file_key)
 
     # Store DB
-    audio_id = await create_audio(db, user["user_id"], file_url)
+    audio_repo = AudioRepository(db)
+    audio = await audio_repo.create(user["user_id"], file_url)
+    audio_id = audio.id
 
     # Trigger Temporal
     client = await Client.connect(settings.TEMPORAL_HOST)

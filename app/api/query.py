@@ -4,7 +4,7 @@ import json
 
 from app.api.deps import get_current_user, get_db_session
 from app.services.rag_service import run_rag
-from app.db.crud import log_query
+from app.db.repositories.query_repo import QueryRepository
 from app.schemas.query import QueryRequest, QueryResponse
 
 router = APIRouter()
@@ -23,8 +23,8 @@ async def query_rag(
 
     confidence = 1.0 if chunks else 0.0
 
-    await log_query(
-        db,
+    query_repo = QueryRepository(db)
+    await query_repo.log(
         user["user_id"],
         body.query,
         json.dumps(chunks),
