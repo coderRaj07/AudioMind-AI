@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str
     CEREBRAS_API_KEY: str
 
-    WHISPER_API_KEY: str
+    DEEPGRAM_API_KEY: str
 
     TEMPORAL_HOST: str
     TEMPORAL_NAMESPACE: str

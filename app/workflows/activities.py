@@ -1,5 +1,5 @@
 from temporalio import activity
-from app.services.whisper_service import transcribe_audio
+from app.services.transcribe_service import transcribe_audio
 from app.services.embedding_service import generate_embeddings
 from app.services.pinecone_service import upsert_vectors
 from app.ingestion.chunking import chunk_text

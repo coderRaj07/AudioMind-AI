@@ -1,24 +1,86 @@
-# 🚀 FINAL COMPLETE SETUP GUIDE — AudioMind-AI
+# 🚀 AudioMind-AI — Production-Grade Audio RAG System
 
-This setup contains:
+AudioMind-AI is a scalable async Audio RAG (Retrieval-Augmented Generation) backend built with:
 
-* ✅ Async Alembic fixes
-* ✅ Pinecone setup
-* ✅ API key generation links
-* ✅ Proper module execution
-* ✅ Correct startup order
-* ✅ Two Pinecone creation options (manual + automated)
+* FastAPI
+* Async SQLAlchemy
+* Temporal workflows
+* Pinecone vector DB
+* LangGraph orchestration
+* Groq + Cerebras inference
+* Deepgram transcription
 
-Based on latest debugging/setup state. 
+The system allows users to:
+
+1. Upload audio
+2. Transcribe speech → text
+3. Chunk + embed content
+4. Store vectors in Pinecone
+5. Query audio semantically using RAG
 
 ---
 
-# 🧱 1. Correct Project Structure
+# 🧠 Architecture Overview
 
-```text id="8jjlwm"
+```text id="m5ycgb"
+Audio Upload
+    ↓
+MinIO / S3 Storage
+    ↓
+Temporal Workflow
+    ↓
+Deepgram Transcription
+    ↓
+Chunking
+    ↓
+Embeddings
+    ↓
+Pinecone Vector DB
+    ↓
+LangGraph Retrieval
+    ↓
+Groq / Cerebras LLM
+    ↓
+Validated Response
+```
+
+---
+
+# 🧱 Tech Stack
+
+| Component         | Technology       |
+| ----------------- | ---------------- |
+| API Framework     | FastAPI          |
+| DB                | PostgreSQL       |
+| ORM               | Async SQLAlchemy |
+| Vector DB         | Pinecone         |
+| Workflow Engine   | Temporal         |
+| Object Storage    | MinIO            |
+| Transcription     | Deepgram         |
+| LLM               | Groq             |
+| LLM Fallback      | Cerebras         |
+| RAG Orchestration | LangGraph        |
+| Migrations        | Alembic          |
+| Containerization  | Docker           |
+
+---
+
+# 📁 Project Structure
+
+```text id="h3txlm"
 AudioMind-AI/
 │
 ├── app/
+│   ├── api/
+│   ├── core/
+│   ├── db/
+│   ├── ingestion/
+│   ├── rag/
+│   ├── schemas/
+│   ├── services/
+│   ├── workflows/
+│   └── utils/
+│
 ├── alembic/
 │   ├── env.py
 │   ├── versions/
@@ -30,41 +92,50 @@ AudioMind-AI/
 ├── scripts/
 │   └── create_pinecone_index.py
 │
+├── tests/
+│
 ├── .env
 ├── alembic.ini
 ├── requirements.txt
+└── README.md
 ```
 
 ---
 
 # 🚨 IMPORTANT CLEANUP
 
-Delete accidental Docker Alembic setup:
+If you accidentally initialized Alembic inside docker:
 
-```bash id="4xjlwm"
+```bash id="fgl2ol"
 rm -rf docker/alembic
 rm -f docker/alembic.ini
 ```
 
+Alembic should ONLY exist at project root.
+
 ---
 
-# ⚙️ 2. Create Virtual Environment
+# ⚙️ Setup Instructions
 
-```bash id="jlwm4z"
+---
+
+# 1. Create Virtual Environment
+
+```bash id="djlwmm"
 python3 -m venv venv
 ```
 
 Activate:
 
-```bash id="jlwm18"
+```bash id="vjlwmz"
 source venv/bin/activate
 ```
 
 ---
 
-# 📦 3. Install Dependencies
+# 2. Install Dependencies
 
-```bash id="jlwmmz"
+```bash id="jlwmy8"
 pip install --upgrade pip setuptools wheel
 
 pip install -r requirements.txt
@@ -72,23 +143,23 @@ pip install -r requirements.txt
 
 ---
 
-# 🔑 4. Generate API Keys
+# 🔑 Generate API Keys
 
 ---
 
-## ⚡ GROQ API Key
+## ⚡ Groq API Key
 
 ### Console
 
-[Groq Console](https://console.groq.com?utm_source=chatgpt.com)
+[Groq Console](https://console.groq.com)
 
 ### API Keys
 
-[Groq API Keys](https://console.groq.com/keys?utm_source=chatgpt.com)
+[Groq API Keys](https://console.groq.com/keys)
 
 Example:
 
-```env id="jlwmwm"
+```env id="jlwm2z"
 GROQ_API_KEY=gsk_xxxxx
 ```
 
@@ -98,57 +169,74 @@ GROQ_API_KEY=gsk_xxxxx
 
 ### Console
 
-[Pinecone Console](https://app.pinecone.io?utm_source=chatgpt.com)
+[Pinecone Console](https://app.pinecone.io)
 
 ### API Key Docs
 
-[Pinecone API Key Docs](https://docs.pinecone.io/guides/projects/manage-api-keys?utm_source=chatgpt.com)
+[Pinecone API Key Docs](https://docs.pinecone.io/guides/projects/manage-api-keys)
 
 Example:
 
-```env id="jlwmmv"
+```env id="jlwmql"
 PINECONE_API_KEY=pcsk_xxxxx
 ```
 
 ---
 
-## 🎤 Whisper API Key (OpenAI)
+## 🎤 Deepgram API Key
 
-### OpenAI Platform
+This project uses Deepgram for speech-to-text transcription because:
 
-[OpenAI Platform](https://platform.openai.com?utm_source=chatgpt.com)
+* better free tier
+* low latency
+* streaming support
+* production-grade audio handling
 
-### API Keys
+### Console
 
-[OpenAI API Keys](https://platform.openai.com/api-keys?utm_source=chatgpt.com)
+[Deepgram Console](https://console.deepgram.com)
+
+### Docs
+
+[Deepgram Speech-to-Text Docs](https://developers.deepgram.com/docs/speech-to-text)
 
 Example:
 
-```env id="jlwmhc"
-WHISPER_API_KEY=sk-xxxx
+```env id="jlwmtk"
+DEEPGRAM_API_KEY=xxxxx
 ```
 
 ---
 
-## 🎧 OPTIONAL (Better Production Audio)
+## 🎧 OPTIONAL — Google Speech-to-Text
 
-### Google Speech-to-Text
+Recommended later for:
 
-[Google Cloud Console](https://console.cloud.google.com?utm_source=chatgpt.com)
+* enterprise streaming
+* diarization
+* realtime speech
 
-[Google Speech-to-Text Docs](https://cloud.google.com/speech-to-text/docs?utm_source=chatgpt.com)
+### Console
+
+[Google Cloud Console](https://console.cloud.google.com)
+
+### Docs
+
+[Google Speech-to-Text Docs](https://cloud.google.com/speech-to-text/docs)
 
 ---
 
-# 🔐 5. Create `.env`
+# 🔐 Create `.env`
 
-```bash id="jjlwmm"
+Create:
+
+```bash id="jlwmmj"
 nano .env
 ```
 
 Paste:
 
-```env id="jlwmym"
+```env id="jlwm97"
 APP_NAME=voice-rag
 ENV=development
 DEBUG=true
@@ -171,7 +259,7 @@ S3_BUCKET=audio-files
 GROQ_API_KEY=YOUR_KEY
 CEREBRAS_API_KEY=YOUR_KEY
 
-WHISPER_API_KEY=YOUR_KEY
+DEEPGRAM_API_KEY=YOUR_KEY
 
 TEMPORAL_HOST=localhost:7233
 TEMPORAL_NAMESPACE=default
@@ -180,17 +268,23 @@ TASK_QUEUE=audio-ingestion
 
 ---
 
-# 🐳 6. Start Infrastructure
+# 🐳 Start Infrastructure
 
-```bash id="4qjlwm"
+Go into docker folder:
+
+```bash id="9xjlwm"
 cd docker
+```
 
+Run:
+
+```bash id="jlwm0u"
 docker compose up -d
 ```
 
 Verify:
 
-```bash id="9zjlwm"
+```bash id="jlwmio"
 docker ps
 ```
 
@@ -202,11 +296,11 @@ You should see:
 
 ---
 
-# 🪣 7. Create MinIO Bucket
+# 🪣 Create MinIO Bucket
 
 Open:
 
-```text id="4hjlwm"
+```text id="jlwm4t"
 http://localhost:9000
 ```
 
@@ -217,25 +311,25 @@ Login:
 
 Create bucket:
 
-```text id="jlwm93"
+```text id="jlwm0h"
 audio-files
 ```
 
 ---
 
-# 🌲 8. Pinecone Setup (2 OPTIONS)
+# 🌲 Pinecone Setup (2 OPTIONS)
 
 ---
 
-# ✅ OPTION 1 — Manual Pinecone Index Creation (Recommended For You)
+# ✅ OPTION 1 — Manual Pinecone Index Creation (Recommended)
 
 Open:
 
-[Pinecone Console](https://app.pinecone.io?utm_source=chatgpt.com)
+[Pinecone Console](https://app.pinecone.io)
 
 Click:
 
-```text id="jlwmm7"
+```text id="jlwm1x"
 Create Index
 ```
 
@@ -255,65 +349,67 @@ Use EXACT settings:
 
 DO NOT use:
 
-```text id="jlwm81"
+```text id="b5jlwm"
 512 dimensions
 ```
 
-because your embeddings are:
+because your embedding model:
 
-```text id="jjlwm3"
+```text id="jlwmw4"
 text-embedding-3-small
 ```
 
-which outputs:
+outputs:
 
-```text id="xffffffff"
-1536 dimensions
+```text id="jlwm77"
+1536-dimensional vectors
 ```
 
 ---
 
-# ✅ OPTION 2 — Automatic Pinecone Index Creation (Infra-as-Code Style)
-
-If you want automated setup instead of manual UI creation:
+# ✅ OPTION 2 — Automatic Pinecone Index Creation
 
 Run from project root:
 
-```bash id="jlwm9y"
+```bash id="c0jlwm"
 python -m scripts.create_pinecone_index
 ```
 
 ⚠️ MUST use:
 
-```bash id="jlwmvq"
+```bash id="n8jlwm"
 python -m
 ```
 
 NOT:
 
-```bash id="jlwm7s"
+```bash id="jlwmvt"
 python scripts/create_pinecone_index.py
 ```
 
-Otherwise you get:
+Otherwise:
 
-```text id="jlwmzo"
+```text id="jlwm3f"
 ModuleNotFoundError: app
 ```
 
 ---
 
-# ⚙️ 9. Fix `alembic.ini`
+# ⚙️ Alembic Setup
+
+---
+
+# Fix `alembic.ini`
 
 ROOT FILE:
 
-```text id="3hjlwm"
+```text id="julwm4"
 AudioMind-AI/alembic.ini
 ```
 
 Use:
 
-```ini id="jlwm0n"
+```ini id="jlwmjq"
 [alembic]
 script_location = alembic
 prepend_sys_path = .
@@ -356,103 +452,111 @@ format = %(levelname)-5.5s [%(name)s] %(message)s
 
 ---
 
-# ⚡ 10. Fix `alembic/env.py`
+# Fix `alembic/env.py`
 
-Replace ENTIRE file with async-safe version using:
+Your Alembic config MUST use:
 
-```python id="jlwmk2"
+```python id="jlwmc8"
 async_engine_from_config
 ```
 
 NOT:
 
-```python id="jlwm5x"
+```python id="s9jlwm"
 engine_from_config
 ```
 
 Otherwise:
 
-```text id="jlwmn2"
+```text id="9njlwm"
 MissingGreenlet
 ```
 
-error happens.
+errors happen with async SQLAlchemy.
 
 ---
 
-# 🗄️ 11. Run Database Migrations
+# 🗄️ Run Database Migrations
 
-Back to root:
+Back to project root:
 
-```bash id="jlwmop"
+```bash id="jlwm76"
 cd ..
 ```
 
 Generate migration:
 
-```bash id="6djlwm"
+```bash id="jlwmzt"
 alembic revision --autogenerate -m "init"
 ```
 
 Apply migration:
 
-```bash id="8fjlwm"
+```bash id="jlwmgn"
 alembic upgrade head
 ```
 
 ---
 
-# ⚡ 12. Start Temporal Worker
+# ⚡ Start Temporal Worker
 
 NEW TERMINAL:
 
-```bash id="jlwm5m"
+```bash id="jlwm5a"
 source venv/bin/activate
 ```
 
 Run:
 
-```bash id="4jjlwm"
+```bash id="jlwmzu"
 python -m app.workflows.worker
 ```
 
 ---
 
-# 🚀 13. Start FastAPI App
+# 🚀 Start FastAPI App
 
 NEW TERMINAL:
 
-```bash id="4gjlwm"
+```bash id="jlwmnz"
 source venv/bin/activate
 ```
 
 Run:
 
-```bash id="q4jlwm"
+```bash id="j9jlwm"
 uvicorn app.main:app --reload
 ```
 
 Expected:
 
-```text id="z3jlwm"
+```text id="jlwm3m"
 Running on http://127.0.0.1:8000
 ```
 
 ---
 
-# 📘 14. Open Swagger
+# 📘 Open Swagger Docs
 
 Open:
 
-```text id="2djlwm"
+```text id="jlwmxq"
 http://localhost:8000/docs
 ```
 
+Endpoints:
+
+* `/upload`
+* `/query`
+* `/health`
+
 ---
 
-# 🔐 15. Generate JWT Token
+# 🔐 Generate JWT Token
 
-```python id="jlwm4n"
+Run Python shell:
+
+```python id="4tjlwm"
 from app.core.security import create_access_token
 
 token = create_access_token({"sub": "user-123"})
@@ -461,15 +565,15 @@ print(token)
 
 ---
 
-# 🎤 16. Upload Audio
+# 🎤 Upload Audio
 
-```http id="7rjlwm"
+```http id="q3jlwm"
 POST /upload
 ```
 
 Header:
 
-```text id="jlwmys"
+```text id="jlwm6w"
 Authorization: Bearer YOUR_TOKEN
 ```
 
@@ -477,7 +581,7 @@ Upload `.wav`.
 
 ---
 
-# 🔄 17. Verify Worker Processing
+# 🔄 Verify Worker Processing
 
 Worker logs should show:
 
@@ -488,18 +592,26 @@ Worker logs should show:
 
 ---
 
-# 🔎 18. Query Audio
+# 🔎 Query Audio
 
-```http id="4ljlwm"
+```http id="jlwmjf"
 POST /query
 ```
 
 Body:
 
-```json id="9mjlwm"
+```json id="jlwm9r"
 {
   "query": "What did I say about AI?"
 }
+```
+
+---
+
+# 🧪 Running Tests
+
+```bash id="jlwmm2"
+pytest
 ```
 
 ---
@@ -516,9 +628,7 @@ Cause:
 
 Fix:
 
-```python id="jlwmxv"
-async_engine_from_config
-```
+* use `async_engine_from_config`
 
 ---
 
@@ -526,7 +636,7 @@ async_engine_from_config
 
 Cause:
 
-```text id="n3jlwm"
+```text id="jlwm8j"
 Index = 512
 Embedding = 1536
 ```
@@ -541,13 +651,13 @@ Fix:
 
 Cause:
 
-```bash id="t6jlwm"
+```bash id="jlwm44"
 python scripts/file.py
 ```
 
 Fix:
 
-```bash id="5tjlwm"
+```bash id="jalwm3"
 python -m scripts.file
 ```
 
@@ -561,15 +671,15 @@ Cause:
 
 Fix:
 
-```bash id="9qjlwm"
+```bash id="jlwm3q"
 python -m app.workflows.worker
 ```
 
 ---
 
-# 🧠 FINAL Correct Startup Sequence
+# 🧠 Final Correct Startup Sequence
 
-```text id="t4jlwm"
+```text id="8qjlwm"
 1. docker compose up -d
 2. create Pinecone index (1536 dim)
 3. alembic revision --autogenerate -m "init"
@@ -577,3 +687,17 @@ python -m app.workflows.worker
 5. python -m app.workflows.worker
 6. uvicorn app.main:app --reload
 ```
+
+---
+
+# 🔥 Future Improvements
+
+Potential next-level upgrades:
+
+* streaming responses
+* websocket transcription
+* Redis caching
+* multi-tenant namespaces
+* observability (Prometheus + Grafana)
+* Kubernetes deployment
+* realtime voice assistant mode
