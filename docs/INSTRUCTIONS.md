@@ -1,14 +1,21 @@
-Here’s the UPDATED and CORRECTED startup flow with all the async Alembic fixes and folder mistakes resolved. This supersedes the earlier instructions. Based on your current setup/debugging state. 
+# 🚀 FINAL COMPLETE SETUP GUIDE — AudioMind-AI
 
-# 🚀 FINAL Correct Run Instructions (Async SQLAlchemy + Alembic + Temporal)
+This setup contains:
+
+* ✅ Async Alembic fixes
+* ✅ Pinecone setup
+* ✅ API key generation links
+* ✅ Proper module execution
+* ✅ Correct startup order
+* ✅ Two Pinecone creation options (manual + automated)
+
+Based on latest debugging/setup state. 
 
 ---
 
-# ✅ 1. Correct Project Structure
+# 🧱 1. Correct Project Structure
 
-You should have ONLY this:
-
-```text id="7fjlwm"
+```text id="8jjlwm"
 AudioMind-AI/
 │
 ├── app/
@@ -21,6 +28,7 @@ AudioMind-AI/
 │   └── docker-compose.yml
 │
 ├── scripts/
+│   └── create_pinecone_index.py
 │
 ├── .env
 ├── alembic.ini
@@ -29,32 +37,34 @@ AudioMind-AI/
 
 ---
 
-# 🚨 IMPORTANT FIX
+# 🚨 IMPORTANT CLEANUP
 
-DELETE these if they exist:
+Delete accidental Docker Alembic setup:
 
-```bash id="jlwmv7"
+```bash id="4xjlwm"
 rm -rf docker/alembic
 rm -f docker/alembic.ini
 ```
 
-You accidentally initialized Alembic inside docker earlier.
-
 ---
 
-# ✅ 2. Activate Virtual Environment
+# ⚙️ 2. Create Virtual Environment
 
-From project root:
+```bash id="jlwm4z"
+python3 -m venv venv
+```
 
-```bash id="jlwm0o"
+Activate:
+
+```bash id="jlwm18"
 source venv/bin/activate
 ```
 
 ---
 
-# ✅ 3. Install Dependencies
+# 📦 3. Install Dependencies
 
-```bash id="jlwmmf"
+```bash id="jlwmmz"
 pip install --upgrade pip setuptools wheel
 
 pip install -r requirements.txt
@@ -62,39 +72,248 @@ pip install -r requirements.txt
 
 ---
 
-# ✅ 4. Verify `.env`
+# 🔑 4. Generate API Keys
 
-Project root:
+---
 
-```env id="jlwm0m"
-DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/voice_rag
-```
+## ⚡ GROQ API Key
 
-⚠️ MUST use:
+### Console
 
-```text id="jlwm2y"
-postgresql+asyncpg://
-```
+[Groq Console](https://console.groq.com?utm_source=chatgpt.com)
 
-NOT:
+### API Keys
 
-```text id="jlwmca"
-postgresql://
+[Groq API Keys](https://console.groq.com/keys?utm_source=chatgpt.com)
+
+Example:
+
+```env id="jlwmwm"
+GROQ_API_KEY=gsk_xxxxx
 ```
 
 ---
 
-# ✅ 5. FIX `alembic.ini`
+## 🌲 Pinecone API Key
+
+### Console
+
+[Pinecone Console](https://app.pinecone.io?utm_source=chatgpt.com)
+
+### API Key Docs
+
+[Pinecone API Key Docs](https://docs.pinecone.io/guides/projects/manage-api-keys?utm_source=chatgpt.com)
+
+Example:
+
+```env id="jlwmmv"
+PINECONE_API_KEY=pcsk_xxxxx
+```
+
+---
+
+## 🎤 Whisper API Key (OpenAI)
+
+### OpenAI Platform
+
+[OpenAI Platform](https://platform.openai.com?utm_source=chatgpt.com)
+
+### API Keys
+
+[OpenAI API Keys](https://platform.openai.com/api-keys?utm_source=chatgpt.com)
+
+Example:
+
+```env id="jlwmhc"
+WHISPER_API_KEY=sk-xxxx
+```
+
+---
+
+## 🎧 OPTIONAL (Better Production Audio)
+
+### Google Speech-to-Text
+
+[Google Cloud Console](https://console.cloud.google.com?utm_source=chatgpt.com)
+
+[Google Speech-to-Text Docs](https://cloud.google.com/speech-to-text/docs?utm_source=chatgpt.com)
+
+---
+
+# 🔐 5. Create `.env`
+
+```bash id="jjlwmm"
+nano .env
+```
+
+Paste:
+
+```env id="jlwmym"
+APP_NAME=voice-rag
+ENV=development
+DEBUG=true
+
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/voice_rag
+
+JWT_SECRET=supersecret
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+PINECONE_API_KEY=YOUR_KEY
+PINECONE_ENV=us-east-1
+PINECONE_INDEX=voice-rag-index
+
+S3_ENDPOINT=http://localhost:9000
+S3_ACCESS_KEY=minio
+S3_SECRET_KEY=minio123
+S3_BUCKET=audio-files
+
+GROQ_API_KEY=YOUR_KEY
+CEREBRAS_API_KEY=YOUR_KEY
+
+WHISPER_API_KEY=YOUR_KEY
+
+TEMPORAL_HOST=localhost:7233
+TEMPORAL_NAMESPACE=default
+TASK_QUEUE=audio-ingestion
+```
+
+---
+
+# 🐳 6. Start Infrastructure
+
+```bash id="4qjlwm"
+cd docker
+
+docker compose up -d
+```
+
+Verify:
+
+```bash id="9zjlwm"
+docker ps
+```
+
+You should see:
+
+* PostgreSQL
+* Temporal
+* MinIO
+
+---
+
+# 🪣 7. Create MinIO Bucket
+
+Open:
+
+```text id="4hjlwm"
+http://localhost:9000
+```
+
+Login:
+
+* username: `minio`
+* password: `minio123`
+
+Create bucket:
+
+```text id="jlwm93"
+audio-files
+```
+
+---
+
+# 🌲 8. Pinecone Setup (2 OPTIONS)
+
+---
+
+# ✅ OPTION 1 — Manual Pinecone Index Creation (Recommended For You)
+
+Open:
+
+[Pinecone Console](https://app.pinecone.io?utm_source=chatgpt.com)
+
+Click:
+
+```text id="jlwmm7"
+Create Index
+```
+
+Use EXACT settings:
+
+| Setting    | Value           |
+| ---------- | --------------- |
+| Name       | voice-rag-index |
+| Dimensions | 1536            |
+| Metric     | cosine          |
+| Type       | Dense           |
+| Region     | us-east-1       |
+
+---
+
+## 🚨 IMPORTANT
+
+DO NOT use:
+
+```text id="jlwm81"
+512 dimensions
+```
+
+because your embeddings are:
+
+```text id="jjlwm3"
+text-embedding-3-small
+```
+
+which outputs:
+
+```text id="xffffffff"
+1536 dimensions
+```
+
+---
+
+# ✅ OPTION 2 — Automatic Pinecone Index Creation (Infra-as-Code Style)
+
+If you want automated setup instead of manual UI creation:
+
+Run from project root:
+
+```bash id="jlwm9y"
+python -m scripts.create_pinecone_index
+```
+
+⚠️ MUST use:
+
+```bash id="jlwmvq"
+python -m
+```
+
+NOT:
+
+```bash id="jlwm7s"
+python scripts/create_pinecone_index.py
+```
+
+Otherwise you get:
+
+```text id="jlwmzo"
+ModuleNotFoundError: app
+```
+
+---
+
+# ⚙️ 9. Fix `alembic.ini`
 
 ROOT FILE:
 
-```text id="jlwmho"
+```text id="3hjlwm"
 AudioMind-AI/alembic.ini
 ```
 
 Use:
 
-```ini id="jlwmv1"
+```ini id="jlwm0n"
 [alembic]
 script_location = alembic
 prepend_sys_path = .
@@ -137,232 +356,103 @@ format = %(levelname)-5.5s [%(name)s] %(message)s
 
 ---
 
-# ✅ 6. FIX `alembic/env.py` (CRITICAL)
+# ⚡ 10. Fix `alembic/env.py`
 
-Replace ENTIRE file with this:
+Replace ENTIRE file with async-safe version using:
 
-```python id="jlwmfs"
-from logging.config import fileConfig
-
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from alembic import context
-
-from app.db.base import Base
-from app.db import models
-from app.core.config import get_settings
-
-settings = get_settings()
-
-config = context.config
-
-config.set_main_option(
-    "sqlalchemy.url",
-    settings.DATABASE_URL
-)
-
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
-
-target_metadata = Base.metadata
-
-
-def run_migrations_offline():
-    url = config.get_main_option("sqlalchemy.url")
-
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-        compare_type=True,
-    )
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-def do_run_migrations(connection: Connection):
-    context.configure(
-        connection=connection,
-        target_metadata=target_metadata,
-        compare_type=True,
-    )
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-async def run_async_migrations():
-    connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-
-    await connectable.dispose()
-
-
-def run_migrations_online():
-    import asyncio
-    asyncio.run(run_async_migrations())
-
-
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+```python id="jlwmk2"
+async_engine_from_config
 ```
+
+NOT:
+
+```python id="jlwm5x"
+engine_from_config
+```
+
+Otherwise:
+
+```text id="jlwmn2"
+MissingGreenlet
+```
+
+error happens.
 
 ---
 
-# ✅ 7. Start Infrastructure
+# 🗄️ 11. Run Database Migrations
 
-Go into docker folder:
+Back to root:
 
-```bash id="jlwmuh"
-cd docker
-```
-
-Run:
-
-```bash id="jlwmww"
-docker compose up -d
-```
-
-Verify:
-
-```bash id="jlwm0j"
-docker ps
-```
-
-You should see:
-
-* PostgreSQL
-* Temporal
-* MinIO
-
----
-
-# ✅ 8. Create MinIO Bucket
-
-Open:
-
-```text id="jlwm13"
-http://localhost:9000
-```
-
-Login:
-
-* username: `minio`
-* password: `minio123`
-
-Create bucket:
-
-```text id="jlwmjs"
-audio-files
-```
-
----
-
-# ✅ 9. Run Alembic Migration (FIXED FLOW)
-
-Go back to root:
-
-```bash id="jlwmv8"
+```bash id="jlwmop"
 cd ..
 ```
 
----
+Generate migration:
 
-## Generate migration
-
-```bash id="jlwm7l"
+```bash id="6djlwm"
 alembic revision --autogenerate -m "init"
 ```
 
-Expected:
+Apply migration:
 
-```text id="jlwm3w"
-Generating alembic/versions/xxxx_init.py
-```
-
----
-
-## Apply migration
-
-```bash id="jlwm2n"
+```bash id="8fjlwm"
 alembic upgrade head
 ```
 
-Expected:
-
-```text id="jlwmvq"
-Running upgrade -> xxxx
-```
-
 ---
 
-# ✅ 10. Create Pinecone Index
-
-```bash id="jlwmqv"
-python scripts/create_pinecone_index.py
-```
-
----
-
-# ✅ 11. Start Temporal Worker
+# ⚡ 12. Start Temporal Worker
 
 NEW TERMINAL:
 
-```bash id="jlwmkg"
+```bash id="jlwm5m"
 source venv/bin/activate
 ```
 
 Run:
 
-```bash id="jlwm7d"
+```bash id="4jjlwm"
 python -m app.workflows.worker
 ```
 
 ---
 
-# ✅ 12. Start FastAPI App
+# 🚀 13. Start FastAPI App
 
 NEW TERMINAL:
 
-```bash id="jlwmtt"
+```bash id="4gjlwm"
 source venv/bin/activate
 ```
 
 Run:
 
-```bash id="jlwmz4"
+```bash id="q4jlwm"
 uvicorn app.main:app --reload
+```
+
+Expected:
+
+```text id="z3jlwm"
+Running on http://127.0.0.1:8000
 ```
 
 ---
 
-# ✅ 13. Open Swagger
+# 📘 14. Open Swagger
 
 Open:
 
-```text id="jlwmh3"
+```text id="2djlwm"
 http://localhost:8000/docs
 ```
 
 ---
 
-# ✅ 14. Generate JWT Token
+# 🔐 15. Generate JWT Token
 
-Run:
-
-```python id="jlwmhh"
+```python id="jlwm4n"
 from app.core.security import create_access_token
 
 token = create_access_token({"sub": "user-123"})
@@ -371,17 +461,15 @@ print(token)
 
 ---
 
-# ✅ 15. Test Upload
+# 🎤 16. Upload Audio
 
-Use:
-
-```http id="jlwm8o"
+```http id="7rjlwm"
 POST /upload
 ```
 
 Header:
 
-```text id="jlwmig"
+```text id="jlwmys"
 Authorization: Bearer YOUR_TOKEN
 ```
 
@@ -389,25 +477,26 @@ Upload `.wav`.
 
 ---
 
-# ✅ 16. Verify Processing
+# 🔄 17. Verify Worker Processing
 
 Worker logs should show:
 
 * transcription
+* chunking
 * embeddings
 * Pinecone upsert
 
 ---
 
-# ✅ 17. Query Audio
+# 🔎 18. Query Audio
 
-```http id="jlwm7g"
+```http id="4ljlwm"
 POST /query
 ```
 
 Body:
 
-```json id="jlwm6k"
+```json id="9mjlwm"
 {
   "query": "What did I say about AI?"
 }
@@ -415,51 +504,76 @@ Body:
 
 ---
 
-# 🚨 IMPORTANT Runtime Notes
+# 🚨 Common Errors
 
-## If migration fails again
+---
 
-Usually one of:
+## ❌ MissingGreenlet
 
-### ❌ Wrong DB URL
+Cause:
 
-Must be:
+* sync Alembic engine with async DB
 
-```text id="jlwmh9"
-postgresql+asyncpg://
+Fix:
+
+```python id="jlwmxv"
+async_engine_from_config
 ```
 
 ---
 
-### ❌ PostgreSQL container not running
+## ❌ Pinecone Dimension Mismatch
 
-Check:
+Cause:
 
-```bash id="jlwm0s"
-docker ps
+```text id="n3jlwm"
+Index = 512
+Embedding = 1536
+```
+
+Fix:
+
+* recreate Pinecone index with `1536`
+
+---
+
+## ❌ ModuleNotFoundError: app
+
+Cause:
+
+```bash id="t6jlwm"
+python scripts/file.py
+```
+
+Fix:
+
+```bash id="5tjlwm"
+python -m scripts.file
 ```
 
 ---
 
-### ❌ Models not imported
+## ❌ Worker not processing
 
-Ensure:
+Cause:
 
-```python id="jlwmmh"
-from app.db import models
+* Temporal worker not running
+
+Fix:
+
+```bash id="9qjlwm"
+python -m app.workflows.worker
 ```
-
-exists in `alembic/env.py`
 
 ---
 
 # 🧠 FINAL Correct Startup Sequence
 
-```text id="jlwm0y"
+```text id="t4jlwm"
 1. docker compose up -d
-2. alembic revision --autogenerate -m "init"
-3. alembic upgrade head
-4. python scripts/create_pinecone_index.py
+2. create Pinecone index (1536 dim)
+3. alembic revision --autogenerate -m "init"
+4. alembic upgrade head
 5. python -m app.workflows.worker
 6. uvicorn app.main:app --reload
 ```
