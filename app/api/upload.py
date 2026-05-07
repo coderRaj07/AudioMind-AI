@@ -23,14 +23,14 @@ async def upload_audio(
 ):
     file_bytes = await file.read()
 
-    file_key = f"{user['user_id']}/{generate_uuid()}.wav"
+    file_key = f"{user.id}/{generate_uuid()}.wav"
 
     # Upload to S3
     file_url = upload_file(file_bytes, file_key)
 
     # Store DB
     audio_repo = AudioRepository(db)
-    audio = await audio_repo.create(user["user_id"], file_url)
+    audio = await audio_repo.create(user.id, file_url)
     audio_id = audio.id
 
     # Trigger Temporal
@@ -39,7 +39,7 @@ async def upload_audio(
     await client.start_workflow(
         "AudioIngestionWorkflow",
         {
-            "user_id": user["user_id"],
+            "user_id": str(user.id),
             "audio_id": str(audio_id),
             "file_key": file_key,
         },

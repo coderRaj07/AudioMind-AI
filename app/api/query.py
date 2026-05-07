@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import json
 
 from app.api.deps import get_current_user, get_db_session
-from app.services.rag_service import run_rag
 from app.db.repositories.query_repo import QueryRepository
 from app.schemas.query import QueryRequest, QueryResponse
 
@@ -16,7 +15,9 @@ async def query_rag(
     user=Depends(get_current_user),
     db: AsyncSession = Depends(get_db_session),
 ):
-    result = await run_rag(body.query, user["user_id"])
+    from app.services.rag_service import run_rag
+
+    result = await run_rag(body.query, str(user.id))
 
     answer = result.get("answer")
     chunks = result.get("chunks", [])
@@ -25,7 +26,7 @@ async def query_rag(
 
     query_repo = QueryRepository(db)
     await query_repo.log(
-        user["user_id"],
+        user.id,
         body.query,
         json.dumps(chunks),
         answer,
