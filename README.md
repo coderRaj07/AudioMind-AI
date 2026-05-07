@@ -1,5 +1,3 @@
-Here’s the UPDATED and CORRECTED startup flow with all the async Alembic fixes and folder mistakes resolved. This supersedes the earlier instructions. Based on your current setup/debugging state. 
-
 # 🚀 FINAL Correct Run Instructions (Async SQLAlchemy + Alembic + Temporal)
 
 ---
