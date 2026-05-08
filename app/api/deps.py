@@ -1,21 +1,36 @@
 from uuid import UUID
 
-from fastapi import Depends, Header
+from fastapi import Depends
+from fastapi.security import APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.core.security import decode_token
 from app.core.exceptions import UnauthorizedException
 from app.db.repositories.user_repo import UserRepository
 
+security = APIKeyHeader(
+    name="Authorization",
+    auto_error=False,
+    description="Send JWT token only, without the Bearer prefix. Example: eyJhbGciOiJIUzI1NiIs...",
+)
+
 
 async def get_current_user(
-    authorization: str | None = Header(default=None),
+    authorization: str | None = Depends(security),
     db: AsyncSession = Depends(get_db),
 ):
-    if not authorization or not authorization.startswith("Bearer "):
+    if not authorization:
         raise UnauthorizedException("Invalid auth header")
 
-    token = authorization.split(" ")[1]
+    if authorization.startswith("Bearer "):
+        token = authorization.split(" ", 1)[1]
+    else:
+        token = authorization
+
+    token = token.strip().strip('"').strip("'")
+    if not token:
+        raise UnauthorizedException("Invalid auth header")
+
     payload = decode_token(token)
     user_id = payload.get("sub")
     if not user_id:
