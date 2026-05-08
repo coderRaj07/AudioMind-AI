@@ -23,7 +23,15 @@ class Settings(BaseSettings):
     S3_BUCKET: str
 
     GROQ_API_KEY: str
-    CEREBRAS_API_KEY: str
+    # GROQ_MODEL: str = "llama-3.3-70b-versatile"
+
+    # CEREBRAS_API_KEY: str
+    # CEREBRAS_MODEL: str = "llama-4-scout-17b-16e-instruct"
+
+    # EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+
+    JINA_API_KEY: str
+    JINA_EMBEDDING_MODEL: str = "jina-embeddings-v2-base-en"
 
     DEEPGRAM_API_KEY: str
 
