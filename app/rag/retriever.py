@@ -7,12 +7,12 @@ logger = get_logger(__name__)
 SIMILARITY_THRESHOLD = 0.7
 
 
-async def retrieve_chunks(query: str, user_id: str):
+async def retrieve_chunks(query: str, user_id: str, audio_id: str | None = None):
     # 1. Embed query
     query_embedding = (await generate_embeddings([query]))[0]
 
     # 2. Query Pinecone
-    results = query_vectors(query_embedding, user_id)
+    results = query_vectors(query_embedding, user_id, audio_id)
 
     matches = results.get("matches", [])
 

@@ -8,22 +8,32 @@ logger = get_logger(__name__)
 
 
 async def _call_groq(prompt: str):
+
     url = "https://api.groq.com/openai/v1/chat/completions"
 
     headers = {
-        "Authorization": f"Bearer {settings.GROQ_API_KEY}"
+        "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+        "Content-Type": "application/json"
     }
 
     payload = {
         "model": "llama3-70b-8192",
         "messages": [
-            {"role": "user", "content": prompt}
+            {
+                "role": "user",
+                "content": prompt
+            }
         ],
         "temperature": 0.2
     }
 
     async with httpx.AsyncClient(timeout=60) as client:
-        res = await client.post(url, json=payload, headers=headers)
+
+        res = await client.post(
+            url,
+            json=payload,
+            headers=headers
+        )
 
     if res.status_code != 200:
         raise Exception(f"Groq failed: {res.text}")
@@ -32,22 +42,32 @@ async def _call_groq(prompt: str):
 
 
 async def _call_cerebras(prompt: str):
+
     url = "https://api.cerebras.ai/v1/chat/completions"
 
     headers = {
-        "Authorization": f"Bearer {settings.CEREBRAS_API_KEY}"
+        "Authorization": f"Bearer {settings.CEREBRAS_API_KEY}",
+        "Content-Type": "application/json"
     }
 
     payload = {
-        "model": "llama3-70b",
+        "model": "llama3.1-8b",
         "messages": [
-            {"role": "user", "content": prompt}
+            {
+                "role": "user",
+                "content": prompt
+            }
         ],
         "temperature": 0.2
     }
 
     async with httpx.AsyncClient(timeout=60) as client:
-        res = await client.post(url, json=payload, headers=headers)
+
+        res = await client.post(
+            url,
+            json=payload,
+            headers=headers
+        )
 
     if res.status_code != 200:
         raise Exception(f"Cerebras failed: {res.text}")
@@ -57,8 +77,14 @@ async def _call_cerebras(prompt: str):
 
 @retry_policy(3)
 async def generate_answer(prompt: str):
+
     try:
         return await _call_groq(prompt)
+
     except Exception as e:
-        logger.warning(f"Groq failed, fallback to Cerebras: {e}")
+
+        logger.warning(
+            f"Groq failed, fallback to Cerebras: {e}"
+        )
+
         return await _call_cerebras(prompt)

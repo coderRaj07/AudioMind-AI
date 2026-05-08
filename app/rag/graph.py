@@ -11,13 +11,18 @@ from app.rag.validator import validate_response
 class GraphState(TypedDict):
     query: str
     user_id: str
+    audio_id: str | None
     chunks: List[Any]
     answer: str
     citations: List[str]
 
 
 async def retrieve_node(state: GraphState):
-    chunks = await retrieve_chunks(state["query"], state["user_id"])
+    chunks = await retrieve_chunks(
+        state["query"],
+        state["user_id"],
+        state["audio_id"],
+    )
     return {"chunks": chunks}
 
 

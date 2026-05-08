@@ -17,13 +17,17 @@ def upsert_vectors(vectors):
         raise
 
 
-def query_vectors(vector, user_id, top_k=5):
+def query_vectors(vector, user_id, audio_id=None, top_k=5):
     try:
+        query_filter = {"user_id": {"$eq": user_id}}
+        if audio_id is not None:
+            query_filter["audio_id"] = {"$eq": audio_id}
+
         return index.query(
             vector=vector,
             top_k=top_k,
             include_metadata=True,
-            filter={"user_id": {"$eq": user_id}},
+            filter=query_filter,
         )
     except Exception as e:
         logger.error(f"Pinecone query failed: {e}")
