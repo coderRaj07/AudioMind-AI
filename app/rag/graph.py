@@ -48,7 +48,10 @@ async def validate_node(state: GraphState):
             "citations": []
         }
 
-    return {}
+    return {
+        "answer": state["answer"],
+        "citations": state["citations"]
+    }
 
 
 def build_graph():
