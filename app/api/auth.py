@@ -43,9 +43,14 @@ async def login(
     if not user or not user.password_hash:
         raise UnauthorizedException("Invalid email or password")
 
+    print(f"User found: {user.email}, password_hash: {user.password_hash[:10]}...")
+    print(f"Input password length: {len(body.password)}, encoded length: {len(body.password.encode('utf-8'))}")
+
     if not verify_password(body.password, user.password_hash):
+        print("Password verification failed")
         raise UnauthorizedException("Invalid email or password")
 
+    print("Password verification succeeded")
     token = create_access_token({"sub": str(user.id)})
 
     return TokenResponse(access_token=token, user=user)

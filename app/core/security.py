@@ -4,21 +4,15 @@ from passlib.context import CryptContext
 from app.core.config import get_settings
 from app.core.exceptions import UnauthorizedException
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 settings = get_settings()
 
 
 def hash_password(password: str) -> str:
-    # Ensure password encoded bytes <= 72 for bcrypt
-    while len(password.encode('utf-8')) > 72:
-        password = password[:-1]
     return pwd_context.hash(password)
 
 
 def verify_password(password: str, hashed: str) -> bool:
-    # Ensure password encoded bytes <= 72 for bcrypt
-    while len(password.encode('utf-8')) > 72:
-        password = password[:-1]
     return pwd_context.verify(password, hashed)
 
 
