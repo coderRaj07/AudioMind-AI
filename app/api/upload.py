@@ -1,16 +1,36 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from temporalio.client import Client
 
-from app.schemas.audio import UploadResponse
+from app.schemas.audio import UploadResponse, AudioStatusResponse
 from app.api.deps import get_current_user, get_db_session
 from app.services.s3_service import upload_file
 from app.db.repositories.audio_repo import AudioRepository
 from app.core.config import get_settings
+from app.core.exceptions import NotFoundException
 from app.utils.ids import generate_uuid
 
 router = APIRouter()
 settings = get_settings()
+
+
+@router.get("/audio/{audio_id}/status", response_model=AudioStatusResponse)
+async def audio_status(
+    audio_id: UUID,
+    user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db_session),
+):
+    audio_repo = AudioRepository(db)
+    audio = await audio_repo.get_by_id(str(audio_id))
+    if not audio or str(audio.user_id) != str(user.id):
+        raise NotFoundException("Audio not found")
+    return AudioStatusResponse(
+        audio_id=audio.id,
+        status=audio.status,
+        progress=audio.progress,
+    )
 
 
 
@@ -49,5 +69,6 @@ async def upload_audio(
 
     return UploadResponse(
         audio_id=audio_id,
-        status="processing"
+        status="processing",
+        progress=0.0,
     )

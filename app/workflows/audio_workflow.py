@@ -1,4 +1,5 @@
 from temporalio import workflow
+from temporalio.common import RetryPolicy
 from datetime import timedelta
 
 
@@ -11,8 +12,6 @@ class AudioIngestionWorkflow:
             "process_audio_activity",
             input_data,
             start_to_close_timeout=timedelta(minutes=15),
-            retry_policy={
-                "maximum_attempts": 3
-            }
+            retry_policy=RetryPolicy(maximum_attempts=3),
         )
         return result

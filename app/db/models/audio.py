@@ -14,5 +14,6 @@ class Audio(Base):
     file_url = Column(Text, nullable=False)
     duration = Column(Float, nullable=True)
     status = Column(String, nullable=False, default="processing")
+    progress = Column(Float, nullable=False, default=0.0)
 
     created_at = Column(TIMESTAMP, server_default=func.now())

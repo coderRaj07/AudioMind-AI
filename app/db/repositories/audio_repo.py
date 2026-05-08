@@ -9,19 +9,20 @@ class AudioRepository(BaseRepository):
         audio = Audio(
             user_id=user_id,
             file_url=file_url,
-            status="processing"
+            status="processing",
+            progress=0.0,
         )
         self.db.add(audio)
         await self.db.commit()
         await self.db.refresh(audio)
         return audio
 
-    async def update_status(self, audio_id: str, status: str):
-        await self.db.execute(
-            update(Audio)
-            .where(Audio.id == audio_id)
-            .values(status=status)
-        )
+    async def update_status(self, audio_id: str, status: str, progress: float | None = None):
+        stmt = update(Audio).where(Audio.id == audio_id).values(status=status)
+        if progress is not None:
+            stmt = stmt.values(progress=progress)
+
+        await self.db.execute(stmt)
         await self.db.commit()
 
     async def get_by_id(self, audio_id: str):
