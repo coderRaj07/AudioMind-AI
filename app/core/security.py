@@ -9,21 +9,17 @@ settings = get_settings()
 
 
 def hash_password(password: str) -> str:
-    # Truncate password to 72 bytes as required by bcrypt
-    password_bytes = password.encode('utf-8')
-    if len(password_bytes) > 72:
-        password_bytes = password_bytes[:72]
-    truncated_password = password_bytes.decode('utf-8', errors='ignore')
-    return pwd_context.hash(truncated_password)
+    # Ensure password encoded bytes <= 72 for bcrypt
+    while len(password.encode('utf-8')) > 72:
+        password = password[:-1]
+    return pwd_context.hash(password)
 
 
 def verify_password(password: str, hashed: str) -> bool:
-    # Truncate password to 72 bytes as required by bcrypt
-    password_bytes = password.encode('utf-8')
-    if len(password_bytes) > 72:
-        password_bytes = password_bytes[:72]
-    truncated_password = password_bytes.decode('utf-8', errors='ignore')
-    return pwd_context.verify(truncated_password, hashed)
+    # Ensure password encoded bytes <= 72 for bcrypt
+    while len(password.encode('utf-8')) > 72:
+        password = password[:-1]
+    return pwd_context.verify(password, hashed)
 
 
 def create_access_token(data: dict):
