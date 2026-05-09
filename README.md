@@ -1,10 +1,9 @@
-# 🚀 FINAL Correct Run Instructions (Async SQLAlchemy + Alembic + Temporal)
+# 🚀 AudioMind AI RAG system
 
 ---
 
 # ✅ 1. Correct Project Structure
 
-You should have ONLY this:
 
 ```text id="7fjlwm"
 AudioMind-AI/
