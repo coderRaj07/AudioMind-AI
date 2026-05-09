@@ -54,6 +54,7 @@ Validated Response
 | DB                | PostgreSQL       |
 | ORM               | Async SQLAlchemy |
 | Vector DB         | Pinecone         |
+| Embeddings        | Jina AI          |
 | Workflow Engine   | Temporal         |
 | Object Storage    | MinIO            |
 | Transcription     | Deepgram         |
@@ -183,6 +184,26 @@ PINECONE_API_KEY=pcsk_xxxxx
 
 ---
 
+## 🔢 Jina AI API Key
+
+Jina AI provides the embedding model (`jina-embeddings-v2-base-en`) that converts text chunks into 768-dimensional vectors for semantic search.
+
+### Console
+
+[Jina AI Console](https://jina.ai/embeddings/)
+
+### API Key
+
+Generate an API key from the Jina AI console.
+
+Example:
+
+```env
+JINA_API_KEY=jina_xxxxx
+```
+
+---
+
 ## 🎤 Deepgram API Key
 
 This project uses Deepgram for speech-to-text transcription because:
@@ -258,6 +279,9 @@ S3_BUCKET=audio-files
 
 GROQ_API_KEY=YOUR_KEY
 CEREBRAS_API_KEY=YOUR_KEY
+
+JINA_API_KEY=YOUR_KEY
+JINA_EMBEDDING_MODEL=jina-embeddings-v2-base-en
 
 DEEPGRAM_API_KEY=YOUR_KEY
 
@@ -338,7 +362,7 @@ Use EXACT settings:
 | Setting    | Value           |
 | ---------- | --------------- |
 | Name       | voice-rag-index |
-| Dimensions | 1536            |
+| Dimensions | 768             |
 | Metric     | cosine          |
 | Type       | Dense           |
 | Region     | us-east-1       |
@@ -350,19 +374,19 @@ Use EXACT settings:
 DO NOT use:
 
 ```text id="b5jlwm"
-512 dimensions
+1536 dimensions
 ```
 
-because your embedding model:
+because the embedding model:
 
 ```text id="jlwmw4"
-text-embedding-3-small
+jina-embeddings-v2-base-en
 ```
 
 outputs:
 
 ```text id="jlwm77"
-1536-dimensional vectors
+768-dimensional vectors
 ```
 
 ---
@@ -637,13 +661,13 @@ Fix:
 Cause:
 
 ```text id="jlwm8j"
-Index = 512
-Embedding = 1536
+Index = 1536
+Embedding = 768
 ```
 
 Fix:
 
-* recreate Pinecone index with `1536`
+* recreate Pinecone index with `768`
 
 ---
 
@@ -681,7 +705,7 @@ python -m app.workflows.worker
 
 ```text id="8qjlwm"
 1. docker compose up -d
-2. create Pinecone index (1536 dim)
+2. create Pinecone index (768 dim, cosine)
 3. alembic revision --autogenerate -m "init"
 4. alembic upgrade head
 5. python -m app.workflows.worker
