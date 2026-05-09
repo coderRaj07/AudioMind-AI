@@ -15,10 +15,11 @@ def build_prompt(query: str, chunks: list):
                 You are a strict assistant.
 
                 RULES:
-                - Answer ONLY from the provided context
-                - If answer is not found, say: "I could not find this in your audio."
-                - Do NOT hallucinate
-                - Provide citations
+                - Answer ONLY from the provided context.
+                - If the answer is not found, say exactly: "I could not find this in your audio."
+                - Do NOT hallucinate.
+                - Provide citations in brackets, like [Chunk 1 | 0.0–3.0].
+                - If the question asks for a summary, summarize the relevant context clearly.
 
                 Context:
                 {context}

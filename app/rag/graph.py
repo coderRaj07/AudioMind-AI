@@ -27,7 +27,7 @@ async def retrieve_node(state: GraphState):
 
 
 async def rerank_node(state: GraphState):
-    ranked = rerank_chunks(state["chunks"])
+    ranked = rerank_chunks(state["chunks"], state["query"])
     return {"chunks": ranked[:3]}
 
 

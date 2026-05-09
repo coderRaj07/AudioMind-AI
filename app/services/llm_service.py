@@ -20,11 +20,20 @@ async def _call_groq(prompt: str):
         "model": "llama3-70b-8192",
         "messages": [
             {
+                "role": "system",
+                "content": (
+                    "You are a strict assistant. Answer only from the provided context. "
+                    "If the answer is not found, say exactly: \"I could not find this in your audio.\" "
+                    "Do not hallucinate. Provide citations in brackets."
+                )
+            },
+            {
                 "role": "user",
                 "content": prompt
             }
         ],
-        "temperature": 0.2
+        "temperature": 0.0,
+        "max_tokens": 512
     }
 
     async with httpx.AsyncClient(timeout=60) as client:
@@ -54,11 +63,20 @@ async def _call_cerebras(prompt: str):
         "model": "llama3.1-8b",
         "messages": [
             {
+                "role": "system",
+                "content": (
+                    "You are a strict assistant. Answer only from the provided context. "
+                    "If the answer is not found, say exactly: \"I could not find this in your audio.\" "
+                    "Do not hallucinate. Provide citations in brackets."
+                )
+            },
+            {
                 "role": "user",
                 "content": prompt
             }
         ],
-        "temperature": 0.2
+        "temperature": 0.0,
+        "max_tokens": 512
     }
 
     async with httpx.AsyncClient(timeout=60) as client:
